@@ -2,3 +2,6 @@
 .idea/
 out/
 Calc2.iml
+
+# Maven
+target/
