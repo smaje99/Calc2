@@ -23,6 +23,16 @@ public class ExpressionEvaluator {
     private int position;
 
     /**
+     * Creates an evaluator ready to parse arithmetic expressions.
+     *
+     * <p>The evaluator keeps only temporary parser position while an expression is being
+     * read. Create one when a calculation service needs to evaluate user-entered text.</p>
+     */
+    public ExpressionEvaluator() {
+        // No configuration is required for the calculator's arithmetic grammar.
+    }
+
+    /**
      * Evaluates one complete arithmetic expression and returns its numeric result.
      *
      * <p>Supported binary operators are {@code +}, {@code -}, {@code *}, {@code /}, and

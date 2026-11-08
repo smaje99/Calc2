@@ -33,8 +33,13 @@ public class CalculatorWindow extends JFrame {
     private static final Color TEXT = new Color(240, 244, 250);
     private static final Color MUTED_TEXT = new Color(161, 174, 194);
 
+    /** Receives calculator input and supplies the expression, result, and error state. */
     private final CalculatorController controller;
+
+    /** Shows the expression currently being entered, above the larger result value. */
     private final JLabel expressionLabel = new JLabel("Enter an expression", SwingConstants.RIGHT);
+
+    /** Shows the current result or the readable error returned by the controller. */
     private final JLabel resultLabel = new JLabel("0", SwingConstants.RIGHT);
 
     /**
@@ -116,5 +121,10 @@ public class CalculatorWindow extends JFrame {
         expressionLabel.setText(expression.isEmpty() ? "Enter an expression" : expression);
         resultLabel.setText(controller.getDisplay());
         resultLabel.setForeground(controller.hasError() ? new Color(255, 132, 132) : TEXT);
+        resultLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, resultFontSize(controller.hasError())));
+    }
+
+    static int resultFontSize(boolean showingError) {
+        return showingError ? 15 : 34;
     }
 }

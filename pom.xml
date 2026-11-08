@@ -44,7 +44,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>Main</mainClass>
+                            <mainClass>com.calc2.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
