@@ -24,4 +24,13 @@ class CalculatorWindowTest {
         assertTrue(java.util.Arrays.asList(CalculatorWindow.keypadLabels()).contains("ℯ"));
         assertEquals(48, CalculatorWindow.resultDisplayHeight());
     }
+
+    @Test
+    void keypadUsesMathematicalFunctionSymbolsAndIncludesAnswerRecall() {
+        java.util.List<String> labels = java.util.Arrays.asList(CalculatorWindow.keypadLabels());
+        assertTrue(labels.contains("√"));
+        assertTrue(labels.contains("sin"));
+        assertTrue(labels.contains("log₁₀"));
+        assertTrue(labels.contains("Ans"));
+    }
 }

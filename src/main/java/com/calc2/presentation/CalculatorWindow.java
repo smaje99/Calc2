@@ -93,12 +93,12 @@ public class CalculatorWindow extends JFrame {
         return content;
     }
     private JPanel createKeypad() {
-        JPanel panel = new JPanel(new GridLayout(7, 4, 8, 8));
+        JPanel panel = new JPanel(new GridLayout(0, 4, 8, 8));
         for (String key : keypadLabels()) { JButton button = new JButton(key); button.addActionListener(e -> keyPressed(key)); panel.add(button); }
         return panel;
     }
     static String[] keypadLabels() {
-        return new String[]{"AC", "(", ")", "÷", "7", "8", "9", "×", "4", "5", "6", "−", "1", "2", "3", "+", "^", "0", ".", "=", "sqrt", "sin", "cos", "tan", "log", "ln", "π", "ℯ"};
+        return new String[]{"AC", "(", ")", "÷", "7", "8", "9", "×", "4", "5", "6", "−", "1", "2", "3", "+", "^", "0", ".", "=", "√", "sin", "cos", "tan", "log₁₀", "ln", "π", "ℯ", "Ans"};
     }
     private void installKeyboardActions() {
         InputMap input = expressionInput.getInputMap(JComponent.WHEN_FOCUSED); ActionMap actions = expressionInput.getActionMap();
@@ -108,12 +108,22 @@ public class CalculatorWindow extends JFrame {
     private void keyPressed(String key) {
         if ("AC".equals(key)) { clear(); return; }
         if ("=".equals(key)) { evaluate(); return; }
-        boolean function = "sqrt".equals(key) || "sin".equals(key) || "cos".equals(key) || "tan".equals(key) || "log".equals(key) || "ln".equals(key);
+        if ("Ans".equals(key)) {
+            controller.press(key);
+            expressionInput.setText(controller.getExpression());
+            expressionInput.setCaretPosition(expressionInput.getText().length());
+            resultLabel.setText(expressionInput.getText());
+            resultLabel.setForeground(settings.getTheme() == CalculatorTheme.DARK ? Color.WHITE : Color.BLACK);
+            resultLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, resultFontSize(false)));
+            return;
+        }
+        boolean function = "√".equals(key) || "sin".equals(key) || "cos".equals(key) || "tan".equals(key) || "log₁₀".equals(key) || "ln".equals(key);
         if (controller.isResultDisplayed()) {
             if ("+−×÷^".contains(key)) expressionInput.setText(controller.getDisplay()); else expressionInput.setText("");
             expressionInput.setCaretPosition(expressionInput.getText().length());
         } else if (controller.hasError()) { expressionInput.setText(""); }
-        String insertion = function ? key + "()" : key;
+        String functionName = "√".equals(key) ? "sqrt" : ("log₁₀".equals(key) ? "log" : key);
+        String insertion = function ? functionName + "()" : key;
         expressionInput.replaceSelection(insertion);
         if (function) expressionInput.setCaretPosition(expressionInput.getCaretPosition() - 1);
         controller.recall(expressionInput.getText()); resultLabel.setText(expressionInput.getText().isEmpty() ? "0" : expressionInput.getText());

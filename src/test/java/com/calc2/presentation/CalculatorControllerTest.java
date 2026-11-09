@@ -104,4 +104,28 @@ class CalculatorControllerTest {
         assertEquals("(1.5+2)", controller.getExpression());
         assertEquals("3.5", controller.getDisplay());
     }
+
+    @Test
+    void reusesTheLastSuccessfulAnswerAsAnOperand() {
+        CalculatorController controller = new CalculatorController();
+        controller.evaluate("6*9");
+
+        controller.press("+");
+        controller.press("Ans");
+        controller.press("=");
+
+        assertEquals("54.0+54.0", controller.getExpression());
+        assertEquals("108.0", controller.getDisplay());
+    }
+
+    @Test
+    void answerKeyStartsANewExpressionWhenAResultIsAlreadyDisplayed() {
+        CalculatorController controller = new CalculatorController();
+        controller.evaluate("6*9");
+
+        controller.press("Ans");
+
+        assertEquals("54.0", controller.getExpression());
+        assertEquals("54.0", controller.getDisplay());
+    }
 }

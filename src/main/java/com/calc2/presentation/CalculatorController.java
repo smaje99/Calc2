@@ -26,6 +26,7 @@ public class CalculatorController {
     private AngleUnit angleUnit = AngleUnit.DEGREES;
     private final StringBuilder expression = new StringBuilder();
     private String display = "0";
+    private String lastAnswer = "0.0";
     private boolean resultDisplayed;
     private boolean errorDisplayed;
 
@@ -55,6 +56,8 @@ public class CalculatorController {
             clear();
         } else if ("=".equals(token)) {
             evaluateCurrent();
+        } else if ("Ans".equals(token)) {
+            enterAnswer();
         } else if (token.length() == 1 && Character.isDigit(token.charAt(0))) {
             enterDigit(token);
         } else if (".".equals(token)) {
@@ -153,6 +156,20 @@ public class CalculatorController {
         updateInputDisplay();
     }
 
+    private void enterAnswer() {
+        if (resultDisplayed || errorDisplayed) {
+            startFreshExpression();
+        }
+        if (expression.length() > 0) {
+            char last = expression.charAt(expression.length() - 1);
+            if (Character.isDigit(last) || last == ')' || last == 'π' || last == 'ℯ') {
+                expression.append('*');
+            }
+        }
+        expression.append(lastAnswer);
+        updateInputDisplay();
+    }
+
     private void enterDecimalPoint() {
         if (resultDisplayed || errorDisplayed) {
             startFreshExpression();
@@ -228,6 +245,7 @@ public class CalculatorController {
         try {
             double result = calculateExpression.execute(expression.toString(), angleUnit);
             display = Double.toString(result);
+            lastAnswer = display;
             resultDisplayed = true;
             errorDisplayed = false;
             history.add(new CalculationRecord(expression.toString(), result, Instant.now()));
