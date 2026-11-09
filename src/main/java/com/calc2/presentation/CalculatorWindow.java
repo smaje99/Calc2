@@ -134,9 +134,10 @@ public class CalculatorWindow extends JFrame {
     }
     private void applySettings() {
         Color background = settings.getTheme() == CalculatorTheme.DARK ? DARK : LIGHT;
-        Color foreground = settings.getTheme() == CalculatorTheme.DARK ? new Color(240, 244, 250) : new Color(30, 38, 50);
+        Color foreground = expressionForeground(settings.getTheme());
         applyPalette(content, background, foreground);
         expressionInput.setBackground(settings.getTheme() == CalculatorTheme.DARK ? new Color(31, 39, 53) : Color.WHITE);
+        expressionInput.setForeground(foreground);
         resultLabel.setForeground(foreground);
         repaint();
     }
@@ -153,4 +154,9 @@ public class CalculatorWindow extends JFrame {
     }
     /** Chooses a compact font for longer messages so calculation errors remain readable. */
     static int resultFontSize(boolean showingError) { return showingError ? 15 : 34; }
+
+    /** Returns a foreground color with readable contrast against the selected theme. */
+    static Color expressionForeground(CalculatorTheme theme) {
+        return theme == CalculatorTheme.DARK ? new Color(240, 244, 250) : new Color(30, 38, 50);
+    }
 }

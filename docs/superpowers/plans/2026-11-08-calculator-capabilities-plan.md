@@ -187,7 +187,7 @@
 - [x] **Step 3: Check dependency direction** with source searches: domain has no Swing/application/preferences imports; application has no Swing/preferences imports; the Preferences adapter is the only class using `java.util.prefs`.
 - [x] **Step 4: Run `mvn clean package`** and generate Javadocs with `javadoc -Xdoclint:all` (through the configured project classpath/source path); resolve errors and new warnings.
 - [ ] **Step 5: Complete the GUI checklist** for keyboard editing, history recall, scientific functions, theme switching, precision changes, and preference persistence after restart. The current computer-use session reports no available apps, so this requires a desktop session.
-- [ ] **Step 6: Capture the final UI** at `docs/reference/ui-after-capabilities.png` if the UI changed materially; preserve existing before/after images. This capture also requires a desktop session.
+- [x] **Step 6: Capture the final UI** at `docs/reference/ui-after-capabilities.png`; the screenshot supplied during review is saved there, and the existing before/after-refactor images are preserved.
 - [x] **Step 7: Commit the phase** with the staged changes, verify `git status --short` is clean, and confirm the phase commit is on the requested `main` branch.
 
 **Acceptance:** README and Javadocs match the actual app; automated checks pass; the GUI checklist passes; the executable JAR launches with the documented command.
