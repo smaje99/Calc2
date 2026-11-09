@@ -41,9 +41,10 @@ keeps calculation rules usable and testable without opening a window.
 
 ## Expression rules
 
-Expressions support decimal numbers, parentheses, `+`, `-`, `*`, `/`, `^`, constants `pi` and
-`e`, and `sqrt(x)`, `sin(x)`, `cos(x)`, `tan(x)`, `log(x)` (base 10), and `ln(x)`. Function
-names are lowercase and require parentheses. Examples include `sqrt(9)`, `2^3^2` (which means
+Expressions support decimal and scientific-notation numbers, parentheses, `+`, `-`, `*`, `/`,
+`×`, `÷`, `−`, `^`, constants `pi`/`π` and `e`/`ℯ`, and `sqrt(x)`, `sin(x)`, `cos(x)`,
+`tan(x)`, `log(x)` (base 10), and `ln(x)`. Function names are lowercase and require
+parentheses. Examples include `sqrt(9)`, `6.8514001115625E8×π`, `2^3^2` (which means
 `2^(3^2)` and evaluates to `512`), and `sin(90)` in degree mode. Unary signs preserve the
 usual power behavior: `-2^2` is `-4`, while `2^-2` is `0.25`. Trigonometry defaults to degrees;
 the angle selector can switch it to radians. The `pi` constant retains its mathematical value
@@ -53,7 +54,8 @@ in either mode.
 
 The expression field supports normal caret movement, selection, typing, paste, Backspace, and
 Delete. Enter evaluates; Escape and `AC` clear. Keypad input replaces the selected text, and
-function buttons insert templates such as `sin()` with the caret inside the parentheses.
+function buttons insert templates such as `sin()` with the caret inside the parentheses. The
+expression keeps the same multiplication, division, and minus symbols shown on the keypad.
 History lists up to the 50 most recent successful calculations for the current run. Selecting
 one restores its expression for editing; errors are not stored.
 

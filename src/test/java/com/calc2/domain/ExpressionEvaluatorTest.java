@@ -72,6 +72,20 @@ class ExpressionEvaluatorTest {
     }
 
     @Test
+    void evaluatesDisplayedScientificNotationWithUnicodeConstants() {
+        assertEquals(6.8514001115625E8 * Math.PI,
+                evaluator.evaluate("6.8514001115625E8*π"), 0.0001);
+        assertEquals(Math.E, evaluator.evaluate("ℯ"), 0.000001);
+        assertEquals(Math.PI, evaluator.evaluate("π"), 0.000001);
+    }
+
+    @Test
+    void evaluatesTheOperatorSymbolsShownOnTheKeypad() {
+        assertEquals(5.0, evaluator.evaluate("2 × 3 − 1"), 0.000001);
+        assertEquals(4.0, evaluator.evaluate("8 ÷ 2"), 0.000001);
+    }
+
+    @Test
     void rejectsUnknownFunctionsAndInvalidRealDomains() {
         assertThrows(CalculationException.class, () -> evaluator.evaluate("sine(90)"));
         assertThrows(CalculationException.class, () -> evaluator.evaluate("sinq(90)"));

@@ -10,10 +10,13 @@ package com.calc2.domain;
  * smaller expression. Exponentiation is right-associative, so {@code "2 ^ 3 ^ 2"} means
  * {@code 2 ^ (3 ^ 2)} and evaluates to {@code 512}.</p>
  *
- * <p>Numbers may contain a decimal point and whitespace may appear between tokens. The
- * evaluator does not change the supplied string. It reports malformed input and division
- * by zero using {@link CalculationException}, allowing callers such as a Swing controller
- * to show a helpful message instead of terminating the application.</p>
+ * <p>Numbers may contain a decimal point or a scientific exponent, and whitespace may appear
+ * between tokens. The keypad glyphs {@code ×}, {@code ÷}, and {@code −} are accepted alongside
+ * their keyboard forms {@code *}, {@code /}, and {@code -}. The constants {@code π} and
+ * {@code ℯ} are accepted alongside {@code pi} and {@code e}. The evaluator does not change the
+ * supplied string. It reports malformed input and division by zero using
+ * {@link CalculationException}, allowing callers such as a Swing controller to show a helpful
+ * message instead of terminating the application.</p>
  *
  * <p>When tangent is evaluated, angles whose cosine has an absolute value below
  * {@code 1.0e-12} are treated as singular. This small tolerance avoids presenting a huge
@@ -41,7 +44,9 @@ public class ExpressionEvaluator {
      * Evaluates one complete arithmetic expression and returns its numeric result.
      *
      * <p>Supported binary operators are {@code +}, {@code -}, {@code *}, {@code /}, and
-     * {@code ^}. Parentheses and decimal numbers are also supported. The grammar follows
+     * {@code ^}; the keypad glyphs {@code −}, {@code ×}, and {@code ÷} are accepted too.
+     * Parentheses, decimal numbers, scientific notation, and the constants {@code π} and
+     * {@code ℯ} are also supported. The grammar follows
      * standard arithmetic precedence, and chained exponentiation is evaluated from right
      * to left. For example, {@code "2 + 3 * 4"} returns {@code 14.0}, while
      * {@code "2 ^ 3 ^ 2"} returns {@code 512.0}.</p>
@@ -87,7 +92,7 @@ public class ExpressionEvaluator {
         while (true) {
             if (consume('+')) {
                 value = finite(value + parseTerm());
-            } else if (consume('-')) {
+            } else if (consume('-') || consume('−')) {
                 value = finite(value - parseTerm());
             } else {
                 return value;
@@ -98,9 +103,9 @@ public class ExpressionEvaluator {
     private double parseTerm() {
         double value = parseUnary();
         while (true) {
-            if (consume('*')) {
+            if (consume('*') || consume('×')) {
                 value = finite(value * parseUnary());
-            } else if (consume('/')) {
+            } else if (consume('/') || consume('÷')) {
                 double divisor = parseUnary();
                 if (divisor == 0.0) {
                     throw new CalculationException("Division by zero is not allowed.");
@@ -116,7 +121,7 @@ public class ExpressionEvaluator {
         if (consume('+')) {
             return parseUnary();
         }
-        if (consume('-')) {
+        if (consume('-') || consume('−')) {
             return -parseUnary();
         }
         return parsePower();
@@ -149,8 +154,8 @@ public class ExpressionEvaluator {
         int start = position;
         while (position < input.length() && Character.isLetter(input.charAt(position))) position++;
         String name = input.substring(start, position);
-        if ("pi".equals(name)) return Math.PI;
-        if ("e".equals(name)) return Math.E;
+        if ("pi".equals(name) || "π".equals(name)) return Math.PI;
+        if ("e".equals(name) || "ℯ".equals(name)) return Math.E;
         if (!"sqrt".equals(name) && !"sin".equals(name) && !"cos".equals(name)
                 && !"tan".equals(name) && !"log".equals(name) && !"ln".equals(name)) {
             throw invalidExpression();
@@ -201,6 +206,15 @@ public class ExpressionEvaluator {
         }
         if (!digitSeen) {
             throw invalidExpression();
+        }
+        if (position < input.length() && (input.charAt(position) == 'e' || input.charAt(position) == 'E')) {
+            position++;
+            if (position < input.length() && (input.charAt(position) == '+' || input.charAt(position) == '-')) {
+                position++;
+            }
+            int exponentStart = position;
+            while (position < input.length() && Character.isDigit(input.charAt(position))) position++;
+            if (position == exponentStart) throw invalidExpression();
         }
         try {
             return Double.parseDouble(input.substring(start, position));

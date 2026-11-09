@@ -10,6 +10,7 @@ import java.util.List;
 
 /** Swing view. The editable text field owns caret and selection behavior; the controller evaluates complete text. */
 public class CalculatorWindow extends JFrame {
+    private static final int RESULT_DISPLAY_HEIGHT = 48;
     private static final Color DARK = new Color(22, 28, 39);
     private static final Color LIGHT = new Color(241, 244, 248);
     /** Coordinates calculations requested by user input. */
@@ -46,7 +47,10 @@ public class CalculatorWindow extends JFrame {
         JPanel top = new JPanel(new BorderLayout(6, 8));
         expressionInput.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 18));
         top.add(expressionInput, BorderLayout.NORTH);
-        resultLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 32)); top.add(resultLabel, BorderLayout.CENTER);
+        resultLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 32));
+        resultLabel.setPreferredSize(new Dimension(0, resultDisplayHeight()));
+        resultLabel.setMinimumSize(new Dimension(0, resultDisplayHeight()));
+        top.add(resultLabel, BorderLayout.CENTER);
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
         JComboBox<AngleUnit> angle = new JComboBox<>(AngleUnit.values()); angle.setSelectedItem(settings.getAngleUnit());
         JComboBox<Integer> precision = new JComboBox<>(new Integer[]{2, 4, 6, 10}); precision.setSelectedItem(settings.getMaximumFractionDigits());
@@ -90,9 +94,11 @@ public class CalculatorWindow extends JFrame {
     }
     private JPanel createKeypad() {
         JPanel panel = new JPanel(new GridLayout(7, 4, 8, 8));
-        String[] keys = {"AC", "(", ")", "÷", "7", "8", "9", "×", "4", "5", "6", "−", "1", "2", "3", "+", "^", "0", ".", "=", "sqrt", "sin", "cos", "tan", "log", "ln", "pi", "e"};
-        for (String key : keys) { JButton button = new JButton(key); button.addActionListener(e -> keyPressed(key)); panel.add(button); }
+        for (String key : keypadLabels()) { JButton button = new JButton(key); button.addActionListener(e -> keyPressed(key)); panel.add(button); }
         return panel;
+    }
+    static String[] keypadLabels() {
+        return new String[]{"AC", "(", ")", "÷", "7", "8", "9", "×", "4", "5", "6", "−", "1", "2", "3", "+", "^", "0", ".", "=", "sqrt", "sin", "cos", "tan", "log", "ln", "π", "ℯ"};
     }
     private void installKeyboardActions() {
         InputMap input = expressionInput.getInputMap(JComponent.WHEN_FOCUSED); ActionMap actions = expressionInput.getActionMap();
@@ -108,7 +114,6 @@ public class CalculatorWindow extends JFrame {
             expressionInput.setCaretPosition(expressionInput.getText().length());
         } else if (controller.hasError()) { expressionInput.setText(""); }
         String insertion = function ? key + "()" : key;
-        if ("×".equals(insertion)) insertion = "*"; if ("÷".equals(insertion)) insertion = "/"; if ("−".equals(insertion)) insertion = "-";
         expressionInput.replaceSelection(insertion);
         if (function) expressionInput.setCaretPosition(expressionInput.getCaretPosition() - 1);
         controller.recall(expressionInput.getText()); resultLabel.setText(expressionInput.getText().isEmpty() ? "0" : expressionInput.getText());
@@ -154,6 +159,9 @@ public class CalculatorWindow extends JFrame {
     }
     /** Chooses a compact font for longer messages so calculation errors remain readable. */
     static int resultFontSize(boolean showingError) { return showingError ? 15 : 34; }
+
+    /** Keeps the result/error row at a stable height as its message font changes. */
+    static int resultDisplayHeight() { return RESULT_DISPLAY_HEIGHT; }
 
     /** Returns a foreground color with readable contrast against the selected theme. */
     static Color expressionForeground(CalculatorTheme theme) {
