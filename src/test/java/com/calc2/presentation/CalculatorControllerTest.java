@@ -8,6 +8,40 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CalculatorControllerTest {
     @Test
+    void evaluatesEditedExpressionAndSupportsContinuingTheResult() {
+        CalculatorController controller = new CalculatorController();
+        controller.evaluate("2+3");
+        assertEquals("5.0", controller.getDisplay());
+        controller.press("+");
+        controller.press("2");
+        controller.press("=");
+        assertEquals("7.0", controller.getDisplay());
+    }
+
+    @Test
+    void clearResetsExpressionAndErrorState() {
+        CalculatorController controller = new CalculatorController();
+        controller.evaluate("7+");
+        assertTrue(controller.hasError());
+        controller.clear();
+        assertEquals("", controller.getExpression());
+        assertEquals("0", controller.getDisplay());
+        assertFalse(controller.hasError());
+    }
+
+    @Test
+    void recordsSuccessfulCalculationsAndDoesNotRecordErrors() {
+        CalculatorController controller = new CalculatorController();
+        controller.evaluate("2+3");
+        controller.evaluate("2+");
+        assertEquals(1, controller.getHistory().size());
+        assertEquals("2+3", controller.getHistory().get(0).getExpression());
+        controller.recall("4*2");
+        assertEquals("4*2", controller.getExpression());
+        assertEquals(1, controller.getHistory().size());
+    }
+
+    @Test
     void buildsAndEvaluatesAnExpressionFromCalculatorKeys() {
         CalculatorController controller = new CalculatorController();
 

@@ -2,6 +2,10 @@ package com.calc2.presentation;
 
 import com.calc2.application.CalculateExpression;
 import com.calc2.domain.CalculationException;
+import com.calc2.application.CalculationHistory;
+import com.calc2.application.CalculationRecord;
+import com.calc2.domain.AngleUnit;
+import java.time.Instant;
 
 /**
  * Owns the calculator's input state and connects key presses to the calculation use case.
@@ -18,6 +22,8 @@ import com.calc2.domain.CalculationException;
  */
 public class CalculatorController {
     private final CalculateExpression calculateExpression;
+    private final CalculationHistory history = new CalculationHistory(50);
+    private AngleUnit angleUnit = AngleUnit.DEGREES;
     private final StringBuilder expression = new StringBuilder();
     private String display = "0";
     private boolean resultDisplayed;
@@ -48,7 +54,7 @@ public class CalculatorController {
         if ("AC".equals(token)) {
             clear();
         } else if ("=".equals(token)) {
-            evaluate();
+            evaluateCurrent();
         } else if (token.length() == 1 && Character.isDigit(token.charAt(0))) {
             enterDigit(token);
         } else if (".".equals(token)) {
@@ -71,6 +77,22 @@ public class CalculatorController {
         return expression.toString();
     }
 
+    /** Evaluates complete text supplied by the editable expression field.
+     * @param expressionText complete user-entered expression
+     */
+    public void evaluate(String expressionText) {
+        expression.setLength(0);
+        if (expressionText != null) expression.append(expressionText);
+        resultDisplayed = false;
+        errorDisplayed = false;
+        if (expression.length() == 0 || expression.toString().trim().isEmpty()) {
+            display = "The expression is incomplete or invalid.";
+            errorDisplayed = true;
+            return;
+        }
+        evaluateCurrent();
+    }
+
     /**
      * Returns the text that belongs in the calculator's main result display.
      *
@@ -91,6 +113,24 @@ public class CalculatorController {
     public boolean hasError() {
         return errorDisplayed;
     }
+
+    /** Reports whether a successful result is currently available for operator continuation.
+     * @return true after success, until new input or clear
+     */
+    public boolean isResultDisplayed() { return resultDisplayed; }
+
+    /** Returns the current session history from newest to oldest.
+     * @return immutable history snapshot
+     */
+    public java.util.List<CalculationRecord> getHistory() { return history.newestFirst(); }
+    /** Changes the unit used by trigonometric functions.
+     * @param value selected unit; null leaves the current unit unchanged
+     */
+    public void setAngleUnit(AngleUnit value) { if (value != null) angleUnit = value; }
+    /** Restores a history expression to the input state without evaluating it.
+     * @param value expression to recall
+     */
+    public void recall(String value) { expression.setLength(0); if (value != null) expression.append(value); display = ""; resultDisplayed = false; errorDisplayed = false; }
 
     /**
      * Clears the expression, result, and error state so a new calculation can begin.
@@ -181,15 +221,16 @@ public class CalculatorController {
         }
     }
 
-    private void evaluate() {
+    private void evaluateCurrent() {
         if (expression.length() == 0) {
             return;
         }
         try {
-            double result = calculateExpression.execute(expression.toString());
+            double result = calculateExpression.execute(expression.toString(), angleUnit);
             display = Double.toString(result);
             resultDisplayed = true;
             errorDisplayed = false;
+            history.add(new CalculationRecord(expression.toString(), result, Instant.now()));
         } catch (CalculationException exception) {
             display = exception.getMessage();
             resultDisplayed = false;

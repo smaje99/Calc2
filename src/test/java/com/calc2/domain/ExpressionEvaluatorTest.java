@@ -54,4 +54,33 @@ class ExpressionEvaluatorTest {
     void reportsDivisionByZeroAsCalculationError() {
         assertThrows(CalculationException.class, () -> evaluator.evaluate("8 / 0"));
     }
+
+    @Test
+    void evaluatesScientificFunctionsAndConstants() {
+        assertEquals(Math.PI, evaluator.evaluate("pi"), 0.000001);
+        assertEquals(Math.E, evaluator.evaluate("e"), 0.000001);
+        assertEquals(3.0, evaluator.evaluate("sqrt(9)"), 0.000001);
+        assertEquals(1.0, evaluator.evaluate("sin(90)"), 0.000001);
+        assertEquals(1.0, evaluator.evaluate("cos(0)"), 0.000001);
+        assertEquals(1.0, evaluator.evaluate("tan(45)"), 0.000001);
+        assertEquals(2.0, evaluator.evaluate("log(100)"), 0.000001);
+        assertEquals(1.0, evaluator.evaluate("ln(e)"), 0.000001);
+        assertEquals(1.0, evaluator.evaluate("sin(pi / 2)", AngleUnit.RADIANS), 0.000001);
+        assertEquals(-4.0, evaluator.evaluate("-2^2"), 0.000001);
+        assertEquals(0.25, evaluator.evaluate("2^-2"), 0.000001);
+        assertEquals(1.0, evaluator.evaluate("sin(pi / 2)", AngleUnit.RADIANS), 0.000001);
+    }
+
+    @Test
+    void rejectsUnknownFunctionsAndInvalidRealDomains() {
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("sine(90)"));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("sin 90"));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("sqrt(-1)"));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("log(0)"));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("tan(90)"));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("10^10000"));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("tan(pi / 2)", AngleUnit.RADIANS));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("ln(-1)"));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("cos(1)" + "unknown"));
+    }
 }

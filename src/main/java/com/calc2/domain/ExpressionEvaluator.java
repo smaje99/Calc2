@@ -21,6 +21,7 @@ package com.calc2.domain;
 public class ExpressionEvaluator {
     private String input;
     private int position;
+    private AngleUnit angleUnit;
 
     /**
      * Creates an evaluator ready to parse arithmetic expressions.
@@ -52,26 +53,38 @@ public class ExpressionEvaluator {
      *         match, a number is invalid, or a division by zero is attempted
      */
     public double evaluate(String expression) {
+        return evaluate(expression, AngleUnit.DEGREES);
+    }
+
+    /** Evaluates a complete expression using the selected trigonometric angle unit.
+     * @param expression complete expression text
+     * @param angleUnit angle unit for {@code sin}, {@code cos}, and {@code tan}
+     * @return the finite result
+     * @throws CalculationException when the expression is malformed or outside the real domain
+     */
+    public double evaluate(String expression, AngleUnit angleUnit) {
         if (expression == null || expression.trim().isEmpty()) {
             throw invalidExpression();
         }
+        if (angleUnit == null) throw new IllegalArgumentException("Angle unit is required.");
         input = expression;
+        this.angleUnit = angleUnit;
         position = 0;
         double result = parseExpression();
         skipWhitespace();
         if (position != input.length()) {
             throw invalidExpression();
         }
-        return result;
+        return finite(result);
     }
 
     private double parseExpression() {
         double value = parseTerm();
         while (true) {
             if (consume('+')) {
-                value += parseTerm();
+                value = finite(value + parseTerm());
             } else if (consume('-')) {
-                value -= parseTerm();
+                value = finite(value - parseTerm());
             } else {
                 return value;
             }
@@ -82,13 +95,13 @@ public class ExpressionEvaluator {
         double value = parseUnary();
         while (true) {
             if (consume('*')) {
-                value *= parseUnary();
+                value = finite(value * parseUnary());
             } else if (consume('/')) {
                 double divisor = parseUnary();
                 if (divisor == 0.0) {
                     throw new CalculationException("Division by zero is not allowed.");
                 }
-                value /= divisor;
+                value = finite(value / divisor);
             } else {
                 return value;
             }
@@ -108,7 +121,7 @@ public class ExpressionEvaluator {
     private double parsePower() {
         double base = parsePrimary();
         if (consume('^')) {
-            return Math.pow(base, parseUnary());
+            return finite(Math.pow(base, parseUnary()));
         }
         return base;
     }
@@ -121,7 +134,48 @@ public class ExpressionEvaluator {
             }
             return value;
         }
+        skipWhitespace();
+        if (position < input.length() && Character.isLetter(input.charAt(position))) {
+            return parseIdentifier();
+        }
         return parseNumber();
+    }
+
+    private double parseIdentifier() {
+        int start = position;
+        while (position < input.length() && Character.isLetter(input.charAt(position))) position++;
+        String name = input.substring(start, position);
+        if ("pi".equals(name)) return Math.PI;
+        if ("e".equals(name)) return Math.E;
+        if (!"sqrt".equals(name) && !"sin".equals(name) && !"cos".equals(name)
+                && !"tan".equals(name) && !"log".equals(name) && !"ln".equals(name)) {
+            throw invalidExpression();
+        }
+        if (!consume('(')) throw invalidExpression();
+        double argument = parseExpression();
+        if (!consume(')')) throw invalidExpression();
+        if ("sqrt".equals(name)) {
+            if (argument < 0.0) throw new CalculationException("Square root requires a non-negative value.");
+            return finite(Math.sqrt(argument));
+        }
+        if ("log".equals(name) || "ln".equals(name)) {
+            if (argument <= 0.0) throw new CalculationException("Logarithms require a positive value.");
+            return finite("log".equals(name) ? Math.log10(argument) : Math.log(argument));
+        }
+        double radians = angleUnit == AngleUnit.DEGREES ? Math.toRadians(argument) : argument;
+        if ("tan".equals(name) && Math.abs(Math.cos(radians)) < 1.0e-12) {
+            throw new CalculationException("Tangent is undefined at this angle.");
+        }
+        if ("sin".equals(name)) return finite(Math.sin(radians));
+        if ("cos".equals(name)) return finite(Math.cos(radians));
+        return finite(Math.tan(radians));
+    }
+
+    private double finite(double value) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            throw new CalculationException("The result is outside the calculator's finite range.");
+        }
+        return value;
     }
 
     private double parseNumber() {

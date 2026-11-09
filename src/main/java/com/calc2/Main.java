@@ -2,6 +2,9 @@ package com.calc2;
 
 import com.calc2.presentation.CalculatorController;
 import com.calc2.presentation.CalculatorWindow;
+import com.calc2.infrastructure.PreferencesSettingsRepository;
+import com.calc2.application.CalculatorSettings;
+import java.util.prefs.Preferences;
 
 import javax.swing.SwingUtilities;
 
@@ -26,7 +29,16 @@ public final class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             CalculatorController controller = new CalculatorController();
-            CalculatorWindow window = new CalculatorWindow(controller);
+            PreferencesSettingsRepository repository;
+            CalculatorSettings settings;
+            try {
+                repository = new PreferencesSettingsRepository(Preferences.userNodeForPackage(Main.class));
+                settings = repository.load();
+            } catch (SecurityException exception) {
+                repository = null;
+                settings = CalculatorSettings.defaults();
+            }
+            CalculatorWindow window = new CalculatorWindow(controller, settings, repository);
             window.setVisible(true);
         });
     }
