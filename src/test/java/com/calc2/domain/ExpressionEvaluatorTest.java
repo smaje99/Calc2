@@ -60,6 +60,7 @@ class ExpressionEvaluatorTest {
         assertEquals(Math.PI, evaluator.evaluate("pi"), 0.000001);
         assertEquals(Math.E, evaluator.evaluate("e"), 0.000001);
         assertEquals(3.0, evaluator.evaluate("sqrt(9)"), 0.000001);
+        assertEquals(3.0, evaluator.evaluate("sqrt(sqrt(81))"), 0.000001);
         assertEquals(1.0, evaluator.evaluate("sin(90)"), 0.000001);
         assertEquals(1.0, evaluator.evaluate("cos(0)"), 0.000001);
         assertEquals(1.0, evaluator.evaluate("tan(45)"), 0.000001);
@@ -68,15 +69,19 @@ class ExpressionEvaluatorTest {
         assertEquals(1.0, evaluator.evaluate("sin(pi / 2)", AngleUnit.RADIANS), 0.000001);
         assertEquals(-4.0, evaluator.evaluate("-2^2"), 0.000001);
         assertEquals(0.25, evaluator.evaluate("2^-2"), 0.000001);
-        assertEquals(1.0, evaluator.evaluate("sin(pi / 2)", AngleUnit.RADIANS), 0.000001);
     }
 
     @Test
     void rejectsUnknownFunctionsAndInvalidRealDomains() {
         assertThrows(CalculationException.class, () -> evaluator.evaluate("sine(90)"));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("sinq(90)"));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("s"));
         assertThrows(CalculationException.class, () -> evaluator.evaluate("sin 90"));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("sqrt(9"));
         assertThrows(CalculationException.class, () -> evaluator.evaluate("sqrt(-1)"));
         assertThrows(CalculationException.class, () -> evaluator.evaluate("log(0)"));
+        assertThrows(CalculationException.class, () -> evaluator.evaluate("log(-1)"));
+        assertEquals(Math.tan(Math.toRadians(89)), evaluator.evaluate("tan(89)"), 0.000001);
         assertThrows(CalculationException.class, () -> evaluator.evaluate("tan(90)"));
         assertThrows(CalculationException.class, () -> evaluator.evaluate("10^10000"));
         assertThrows(CalculationException.class, () -> evaluator.evaluate("tan(pi / 2)", AngleUnit.RADIANS));

@@ -117,8 +117,9 @@ public class CalculatorWindow extends JFrame {
         controller.evaluate(expressionInput.getText());
         resultLabel.setText(controller.hasError() ? controller.getDisplay() : ResultFormatter.format(Double.parseDouble(controller.getDisplay()), settings.getMaximumFractionDigits()));
         resultLabel.setForeground(controller.hasError() ? new Color(205, 45, 45) : (settings.getTheme() == CalculatorTheme.DARK ? Color.WHITE : Color.BLACK));
+        resultLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, resultFontSize(controller.hasError())));
     }
-    private void clear() { controller.clear(); expressionInput.setText(""); resultLabel.setText("0"); }
+    private void clear() { controller.clear(); expressionInput.setText(""); resultLabel.setText("0"); resultLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, resultFontSize(false))); }
     private void showHistory() {
         List<CalculationRecord> entries = controller.getHistory(); DefaultListModel<CalculationRecord> model = new DefaultListModel<>();
         for (CalculationRecord record : entries) model.addElement(record);
@@ -150,5 +151,6 @@ public class CalculatorWindow extends JFrame {
             }
         }
     }
+    /** Chooses a compact font for longer messages so calculation errors remain readable. */
     static int resultFontSize(boolean showingError) { return showingError ? 15 : 34; }
 }
