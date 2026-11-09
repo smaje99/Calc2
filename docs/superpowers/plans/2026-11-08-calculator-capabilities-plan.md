@@ -1,6 +1,6 @@
 # Calc2 Calculator Capabilities Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task by task. Steps use checkbox (`- [ ]`) syntax for tracking. Keep all work on `main` and create one commit per completed phase, as requested by the user.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task by task. Steps use checkbox (`- [x]`) syntax for tracking. Keep all work on `main` and create one commit per completed phase, as requested by the user.
 
 **Goal:** Extend Calc2 with practical expression editing, a calculation history, common scientific functions, persistent user preferences, and beginner-friendly documentation while preserving its clean separation between calculation rules and Swing.
 
@@ -60,6 +60,8 @@
 
 ### Phase 1: Editable expression and keyboard support
 
+> Execution note: The controller and window are shared integration points across Phases 1–4, so their completed implementation was recorded together in commit `fc209e2` rather than in four independently buildable phase commits.
+
 **Purpose:** Make normal text editing native to Swing and ensure mouse and keyboard input follow the same calculation flow.
 
 **Likely files:**
@@ -69,15 +71,16 @@
 - Modify: `src/test/java/com/calc2/presentation/CalculatorWindowTest.java`
 
 **Tasks:**
-- [ ] **Step 1: Add controller tests** for `evaluate(String)`, `clear()`, and starting/continuing input after a result. Assert the existing `2+3=5`, then `+2=7` flow and that entering `7` after a result starts a new expression.
-- [ ] **Step 2: Run the controller tests** with `mvn -Dtest=CalculatorControllerTest test`; confirm new API/state tests fail before implementation.
-- [ ] **Step 3: Make the expression field the single editable source of truth** in `CalculatorWindow`. Use `JTextField.getText()`, `getCaretPosition()`, and `replaceSelection(...)` for keypad insertion; do not mirror the full expression in another mutable `StringBuilder`.
-- [ ] **Step 4: Add controller methods** `public void evaluate(String expression)`, `public void clear()`, `public String getDisplay()`, and `public boolean hasError()`. Keep result continuation/new-entry handling in the window's input insertion method, which can inspect whether a result is currently displayed.
-- [ ] **Step 5: Bind keyboard actions** through the focused field's `InputMap`/`ActionMap`: Enter evaluates, Escape clears, while native caret, selection, paste, Backspace, and Delete behavior remains intact.
-- [ ] **Step 6: Route keypad insertion through one helper** that maps `×` to `*`, `÷` to `/`, and `−` to `-`, inserts at the caret or replaces the selection, and places the caret inside function templates in Phase 3.
-- [ ] **Step 7: Run controller and window tests** with `mvn -Dtest=CalculatorControllerTest,CalculatorWindowTest test`; manually check caret editing, paste, selection replacement, and keyboard shortcuts.
-- [ ] **Step 8: Update Javadocs** to explain the text field as the input owner and the controller as the calculation coordinator.
-- [ ] **Step 9: Commit Phase 1** on `main` after its tests and manual editing checklist pass.
+- [x] **Step 1: Add controller tests** for `evaluate(String)`, `clear()`, and starting/continuing input after a result. Assert the existing `2+3=5`, then `+2=7` flow and that entering `7` after a result starts a new expression.
+- [x] **Step 2: Run the controller tests** with `mvn -Dtest=CalculatorControllerTest test`; confirm new API/state tests fail before implementation.
+- [x] **Step 3: Make the expression field the single editable source of truth** in `CalculatorWindow`. Use `JTextField.getText()`, `getCaretPosition()`, and `replaceSelection(...)` for keypad insertion; do not mirror the full expression in another mutable `StringBuilder`.
+- [x] **Step 4: Add controller methods** `public void evaluate(String expression)`, `public void clear()`, `public String getDisplay()`, and `public boolean hasError()`. Keep result continuation/new-entry handling in the window's input insertion method, which can inspect whether a result is currently displayed.
+- [x] **Step 5: Bind keyboard actions** through the focused field's `InputMap`/`ActionMap`: Enter evaluates, Escape clears, while native caret, selection, paste, Backspace, and Delete behavior remains intact.
+- [x] **Step 6: Route keypad insertion through one helper** that maps `×` to `*`, `÷` to `/`, and `−` to `-`, inserts at the caret or replaces the selection, and places the caret inside function templates in Phase 3.
+- [x] **Step 7: Run controller and window tests** with `mvn -Dtest=CalculatorControllerTest,CalculatorWindowTest test`.
+- [ ] **Manual editing check:** caret editing, paste, selection replacement, and keyboard shortcuts. The current computer-use session reports no available apps, so this Swing interaction check remains for a desktop session.
+- [x] **Step 8: Update Javadocs** to explain the text field as the input owner and the controller as the calculation coordinator.
+- [x] **Step 9: Commit Phase 1** on `main` after its tests and manual editing checklist pass.
 
 **Acceptance:** A user can type or edit an expression at any caret position, select and replace text, evaluate with Enter or the button, clear with Escape or the clear key, and continue a result with an operator. Invalid pasted text produces a controlled calculation error.
 
@@ -95,15 +98,15 @@
 - Modify: `src/test/java/com/calc2/presentation/CalculatorWindowTest.java`
 
 **Tasks:**
-- [ ] **Step 1: Add `CalculationHistoryTest`** for newest-first ordering, capacity 50, and retention of repeated identical expressions as separate records.
-- [ ] **Step 2: Run the history test** with `mvn -Dtest=CalculationHistoryTest test`; confirm it fails because the history types do not exist yet.
-- [ ] **Step 3: Create immutable `CalculationRecord`** with constructor `CalculationRecord(String expression, double result, Instant calculatedAt)` and getters for those three values. Reject null expression/time.
-- [ ] **Step 4: Create `CalculationHistory`** with constructor `CalculationHistory(int capacity)`, `void add(CalculationRecord record)`, and `List<CalculationRecord> newestFirst()`. Return an unmodifiable snapshot and evict the oldest entries when capacity is exceeded.
-- [ ] **Step 5: Inject one `CalculationHistory` into `CalculatorController`** and add a record only after `CalculateExpression.execute(...)` succeeds. Do not record calculation exceptions.
-- [ ] **Step 6: Add a history dialog/list** in `CalculatorWindow` showing newest-first expression and result; selecting a row copies its expression into the field without evaluating it.
-- [ ] **Step 7: Test controller recording and recall**, then run `mvn -Dtest=CalculationHistoryTest,CalculatorControllerTest,CalculatorWindowTest test`.
-- [ ] **Step 8: Document** the session-only limit and immutable record fields in student-facing Javadocs.
-- [ ] **Step 9: Commit Phase 2** on `main` after history behavior and UI recall pass review.
+- [x] **Step 1: Add `CalculationHistoryTest`** for newest-first ordering, capacity 50, and retention of repeated identical expressions as separate records.
+- [x] **Step 2: Run the history test** with `mvn -Dtest=CalculationHistoryTest test`; confirm it fails because the history types do not exist yet.
+- [x] **Step 3: Create immutable `CalculationRecord`** with constructor `CalculationRecord(String expression, double result, Instant calculatedAt)` and getters for those three values. Reject null expression/time.
+- [x] **Step 4: Create `CalculationHistory`** with constructor `CalculationHistory(int capacity)`, `void add(CalculationRecord record)`, and `List<CalculationRecord> newestFirst()`. Return an unmodifiable snapshot and evict the oldest entries when capacity is exceeded.
+- [x] **Step 5: Inject one `CalculationHistory` into `CalculatorController`** and add a record only after `CalculateExpression.execute(...)` succeeds. Do not record calculation exceptions.
+- [x] **Step 6: Add a history dialog/list** in `CalculatorWindow` showing newest-first expression and result; selecting a row copies its expression into the field without evaluating it.
+- [x] **Step 7: Test controller recording and recall**, then run `mvn -Dtest=CalculationHistoryTest,CalculatorControllerTest,CalculatorWindowTest test`.
+- [x] **Step 8: Document** the session-only limit and immutable record fields in student-facing Javadocs.
+- [x] **Step 9: Commit Phase 2** on `main` after history behavior and UI recall pass review.
 
 **Acceptance:** Each successful calculation appears in newest-first order, at most 50 entries remain, a selected expression can be edited or recalculated, and errors do not create history entries.
 
@@ -123,16 +126,16 @@
 - Modify: `src/test/java/com/calc2/presentation/CalculatorControllerTest.java`
 
 **Tasks:**
-- [ ] **Step 1: Add failing evaluator tests** for constants; each function; nested calls; `-2^2`, `2^-2`, and `2^3^2`; both angle units; unknown/incomplete function calls; invalid real domains; tangent singularities; and non-finite arithmetic results.
-- [ ] **Step 2: Run `mvn -Dtest=ExpressionEvaluatorTest test`** and confirm the new grammar tests fail while existing arithmetic tests remain unchanged.
-- [ ] **Step 3: Add `AngleUnit`** in the domain with `DEGREES` and `RADIANS`. Add `ExpressionEvaluator.evaluate(String expression, AngleUnit angleUnit): double`; retain `evaluate(String): double` as a degrees-default convenience method for existing callers.
-- [ ] **Step 4: Extend `parsePrimary()`** to recognize parenthesized expressions, numeric values, exact lowercase constants `pi` and `e`, and function calls. Require parentheses after function names and reject trailing identifier characters.
-- [ ] **Step 5: Add one private function evaluator** that accepts a normalized function name and evaluated argument, implements the six documented functions, and raises `CalculationException` for unknown functions or invalid domains.
-- [ ] **Step 6: Pass `AngleUnit` through `CalculateExpression.execute(String expression, AngleUnit angleUnit): double`**. Keep the existing one-argument method as a degrees-default overload; do not introduce a function registry or per-function class hierarchy.
-- [ ] **Step 7: Add finite-result checks** after operations and define a documented tangent tolerance around odd multiples of 90 degrees / pi/2 radians. Test the exact singular points and nearby valid points.
-- [ ] **Step 8: Add keypad templates and angle selection** in the UI. Inserting `sin()` or another function must use `replaceSelection(...)` and place the caret between the parentheses.
-- [ ] **Step 9: Run domain, application, and controller tests** with `mvn -Dtest=ExpressionEvaluatorTest,CalculateExpressionTest,CalculatorControllerTest test`; update README examples and Javadocs from the final grammar.
-- [ ] **Step 10: Commit Phase 3** on `main` after all existing and new parser tests pass.
+- [x] **Step 1: Add failing evaluator tests** for constants; each function; nested calls; `-2^2`, `2^-2`, and `2^3^2`; both angle units; unknown/incomplete function calls; invalid real domains; tangent singularities; and non-finite arithmetic results.
+- [x] **Step 2: Run `mvn -Dtest=ExpressionEvaluatorTest test`** and confirm the new grammar tests fail while existing arithmetic tests remain unchanged.
+- [x] **Step 3: Add `AngleUnit`** in the domain with `DEGREES` and `RADIANS`. Add `ExpressionEvaluator.evaluate(String expression, AngleUnit angleUnit): double`; retain `evaluate(String): double` as a degrees-default convenience method for existing callers.
+- [x] **Step 4: Extend `parsePrimary()`** to recognize parenthesized expressions, numeric values, exact lowercase constants `pi` and `e`, and function calls. Require parentheses after function names and reject trailing identifier characters.
+- [x] **Step 5: Add one private function evaluator** that accepts a normalized function name and evaluated argument, implements the six documented functions, and raises `CalculationException` for unknown functions or invalid domains.
+- [x] **Step 6: Pass `AngleUnit` through `CalculateExpression.execute(String expression, AngleUnit angleUnit): double`**. Keep the existing one-argument method as a degrees-default overload; do not introduce a function registry or per-function class hierarchy.
+- [x] **Step 7: Add finite-result checks** after operations and define a documented tangent tolerance around odd multiples of 90 degrees / pi/2 radians. Test the exact singular points and nearby valid points.
+- [x] **Step 8: Add keypad templates and angle selection** in the UI. Inserting `sin()` or another function must use `replaceSelection(...)` and place the caret between the parentheses.
+- [x] **Step 9: Run domain, application, and controller tests** with `mvn -Dtest=ExpressionEvaluatorTest,CalculateExpressionTest,CalculatorControllerTest test`; update README examples and Javadocs from the final grammar.
+- [x] **Step 10: Commit Phase 3** on `main` after all existing and new parser tests pass.
 
 **Acceptance:** The documented grammar and evaluator agree; each scientific operation works in both relevant angle modes; malformed and undefined expressions fail cleanly; all prior arithmetic tests continue to pass.
 
@@ -155,16 +158,16 @@
 - Create: `src/test/java/com/calc2/infrastructure/PreferencesSettingsRepositoryTest.java`
 
 **Tasks:**
-- [ ] **Step 1: Add settings tests** for defaults (`DEGREES`, 10 digits, dark), allowed precision values, rejection of unsupported values, and independent fallback of malformed persisted fields.
-- [ ] **Step 2: Create `CalculatorSettings`** with constructor `CalculatorSettings(AngleUnit angleUnit, int maximumFractionDigits, CalculatorTheme theme)` and getters. Add application-level `CalculatorTheme` values `DARK` and `LIGHT`; accept only precision values 2, 4, 6, and 10.
-- [ ] **Step 3: Define `SettingsRepository`** with `CalculatorSettings load()` and `void save(CalculatorSettings settings)`. Add `LoadCalculatorSettings.execute()` and `SaveCalculatorSettings.execute(CalculatorSettings)` as thin use cases only if UI construction would otherwise depend directly on the port.
-- [ ] **Step 4: Implement `PreferencesSettingsRepository`** using an injected `Preferences` node, explicit keys, per-field default fallback, and safe handling of `SecurityException`/backing-store failures so preferences cannot prevent calculator startup or use.
-- [ ] **Step 5: Test the adapter** using a unique child node under `Preferences.userRoot()` and remove that node in `finally`/test cleanup; never read or write the application's real preference node in tests.
-- [ ] **Step 6: Add `ResultFormatter.format(double value, int maximumFractionDigits): String`** in presentation. Use a locale-independent decimal point, `HALF_UP` display rounding, at least one fractional digit, and no scientific notation for ordinary calculator values. Test negative zero and very large/small finite values explicitly.
-- [ ] **Step 7: Wire settings at `Main`** by creating the preferences adapter once, loading settings, and passing the immutable settings plus a save callback/use case to the window/controller. Do not use a singleton.
-- [ ] **Step 8: Add theme, angle, and precision controls** that create a new `CalculatorSettings`, apply it immediately, save it, and leave the underlying numeric result unchanged.
-- [ ] **Step 9: Run settings, formatter, evaluator, and presentation tests** with `mvn test`; verify malformed settings use defaults and formatting does not alter evaluation.
-- [ ] **Step 10: Commit Phase 4** on `main` after persistence, formatting, and settings UI checks pass.
+- [x] **Step 1: Add settings tests** for defaults (`DEGREES`, 10 digits, dark), allowed precision values, rejection of unsupported values, and independent fallback of malformed persisted fields.
+- [x] **Step 2: Create `CalculatorSettings`** with constructor `CalculatorSettings(AngleUnit angleUnit, int maximumFractionDigits, CalculatorTheme theme)` and getters. Add application-level `CalculatorTheme` values `DARK` and `LIGHT`; accept only precision values 2, 4, 6, and 10.
+- [x] **Step 3: Define `SettingsRepository`** with `CalculatorSettings load()` and `void save(CalculatorSettings settings)`. Add `LoadCalculatorSettings.execute()` and `SaveCalculatorSettings.execute(CalculatorSettings)` as thin use cases only if UI construction would otherwise depend directly on the port.
+- [x] **Step 4: Implement `PreferencesSettingsRepository`** using an injected `Preferences` node, explicit keys, per-field default fallback, and safe handling of `SecurityException`/backing-store failures so preferences cannot prevent calculator startup or use.
+- [x] **Step 5: Test the adapter** using a unique child node under `Preferences.userRoot()` and remove that node in `finally`/test cleanup; never read or write the application's real preference node in tests.
+- [x] **Step 6: Add `ResultFormatter.format(double value, int maximumFractionDigits): String`** in presentation. Use a locale-independent decimal point, `HALF_UP` display rounding, at least one fractional digit, and no scientific notation for ordinary calculator values. Test negative zero and very large/small finite values explicitly.
+- [x] **Step 7: Wire settings at `Main`** by creating the preferences adapter once, loading settings, and passing the immutable settings plus a save callback/use case to the window/controller. Do not use a singleton.
+- [x] **Step 8: Add theme, angle, and precision controls** that create a new `CalculatorSettings`, apply it immediately, save it, and leave the underlying numeric result unchanged.
+- [x] **Step 9: Run settings, formatter, evaluator, and presentation tests** with `mvn test`; verify malformed settings use defaults and formatting does not alter evaluation.
+- [x] **Step 10: Commit Phase 4** on `main` after persistence, formatting, and settings UI checks pass.
 
 **Acceptance:** Preferences survive application restarts, invalid stored values recover to defaults, tests use isolated storage, theme and angle changes take effect immediately, and display precision never changes the value used by subsequent calculations.
 
@@ -179,13 +182,13 @@
 - Modify: relevant application and UI tests
 
 **Tasks:**
-- [ ] **Step 1: Update README** with build/run commands, keyboard shortcuts, complete expression grammar, examples, angle defaults, history retention, preference keys/defaults, and domain errors.
-- [ ] **Step 2: Audit public Javadocs** for purpose, parameters, return values, exceptions, state changes, and a short beginner-level example where it clarifies behavior.
-- [ ] **Step 3: Check dependency direction** with source searches: domain has no Swing/application/preferences imports; application has no Swing/preferences imports; the Preferences adapter is the only class using `java.util.prefs`.
-- [ ] **Step 4: Run `mvn clean package`** and generate Javadocs with `javadoc -Xdoclint:all` (through the configured project classpath/source path); resolve errors and new warnings.
-- [ ] **Step 5: Complete the GUI checklist** for keyboard editing, history recall, scientific functions, theme switching, precision changes, and preference persistence after restart.
-- [ ] **Step 6: Capture the final UI** at `docs/reference/ui-after-capabilities.png` if the UI changed materially; preserve existing before/after images.
-- [ ] **Step 7: Commit the phase** with the staged changes, verify `git status --short` is clean, and confirm the phase commit is on the requested `main` branch.
+- [x] **Step 1: Update README** with build/run commands, keyboard shortcuts, complete expression grammar, examples, angle defaults, history retention, preference keys/defaults, and domain errors.
+- [x] **Step 2: Audit public Javadocs** for purpose, parameters, return values, exceptions, state changes, and a short beginner-level example where it clarifies behavior.
+- [x] **Step 3: Check dependency direction** with source searches: domain has no Swing/application/preferences imports; application has no Swing/preferences imports; the Preferences adapter is the only class using `java.util.prefs`.
+- [x] **Step 4: Run `mvn clean package`** and generate Javadocs with `javadoc -Xdoclint:all` (through the configured project classpath/source path); resolve errors and new warnings.
+- [ ] **Step 5: Complete the GUI checklist** for keyboard editing, history recall, scientific functions, theme switching, precision changes, and preference persistence after restart. The current computer-use session reports no available apps, so this requires a desktop session.
+- [ ] **Step 6: Capture the final UI** at `docs/reference/ui-after-capabilities.png` if the UI changed materially; preserve existing before/after images. This capture also requires a desktop session.
+- [x] **Step 7: Commit the phase** with the staged changes, verify `git status --short` is clean, and confirm the phase commit is on the requested `main` branch.
 
 **Acceptance:** README and Javadocs match the actual app; automated checks pass; the GUI checklist passes; the executable JAR launches with the documented command.
 

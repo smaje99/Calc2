@@ -1,6 +1,6 @@
 # Calc2 Clean Architecture Refactor Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task by task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task by task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Replace the current Spanish, tightly coupled Swing calculator with a cleanly separated Java application whose engine and documentation are in English, then redesign the UI using the saved screenshot as the before reference.
 
@@ -43,10 +43,10 @@
 **Interfaces:**
 - Produces: the agreed supported expression behavior and a Maven test setup before the implementation is replaced.
 
-- [ ] **Step 1: Add JUnit 5 and configure Maven Surefire** in `pom.xml`; move the current Java files to `src/main/java`, remove the custom `sourceDirectory` override, and use Maven's standard source and test directories while retaining Java 8 as the compiler release.
-- [ ] **Step 2: Write domain tests** for decimal arithmetic, each binary operator, precedence, nested parentheses, right-associative exponentiation, malformed tokens, unbalanced parentheses, and division by zero.
-- [ ] **Step 3: Write use-case tests** proving that a valid expression returns a numeric calculation result and invalid input produces the documented calculation error.
-- [ ] **Step 4: Run `mvn test`** and confirm the tests fail against the old implementation or absent replacement types for the expected behavioral reasons.
+- [x] **Step 1: Add JUnit 5 and configure Maven Surefire** in `pom.xml`; move the current Java files to `src/main/java`, remove the custom `sourceDirectory` override, and use Maven's standard source and test directories while retaining Java 8 as the compiler release.
+- [x] **Step 2: Write domain tests** for decimal arithmetic, each binary operator, precedence, nested parentheses, right-associative exponentiation, malformed tokens, unbalanced parentheses, and division by zero.
+- [x] **Step 3: Write use-case tests** proving that a valid expression returns a numeric calculation result and invalid input produces the documented calculation error.
+- [x] **Step 4: Run `mvn test`** and confirm the tests fail against the old implementation or absent replacement types for the expected behavioral reasons.
 
 ### Task 2: Replace the calculation engine with a pure domain evaluator
 
@@ -60,10 +60,10 @@
 - Produces: `double ExpressionEvaluator.evaluate(String expression)`; invalid expressions and division by zero raise `CalculationException` with an English, user-readable message.
 - Consumes: test contract from Task 1.
 
-- [ ] **Step 1: Implement tokenization and parsing** with clear separation between parsing rules and arithmetic operations; reject unknown characters, missing operands, malformed decimals, and mismatched parentheses.
-- [ ] **Step 2: Implement evaluation** with documented precedence and right-associative exponentiation; do not mutate caller-owned expression data.
-- [ ] **Step 3: Add detailed English Javadocs** explaining the evaluator's public contract, operator precedence, associativity, failure cases, and examples suitable for students.
-- [ ] **Step 4: Run `mvn test`** and confirm all domain tests pass.
+- [x] **Step 1: Implement tokenization and parsing** with clear separation between parsing rules and arithmetic operations; reject unknown characters, missing operands, malformed decimals, and mismatched parentheses.
+- [x] **Step 2: Implement evaluation** with documented precedence and right-associative exponentiation; do not mutate caller-owned expression data.
+- [x] **Step 3: Add detailed English Javadocs** explaining the evaluator's public contract, operator precedence, associativity, failure cases, and examples suitable for students.
+- [x] **Step 4: Run `mvn test`** and confirm all domain tests pass.
 
 ### Task 3: Add the application use case and rebuild the Swing UI
 
@@ -79,12 +79,12 @@
 - Consumes: `ExpressionEvaluator.evaluate(String)` from Task 2.
 - Produces: `double CalculateExpression.execute(String)` for the presentation layer; a fresh Swing UI retaining the current calculator operations and providing readable spacing, alignment, typography, and clear error feedback.
 
-- [ ] **Step 1: Implement `CalculateExpression`** as the single application entry point for calculation, translating domain results/errors into a presentation-friendly result without importing Swing.
-- [ ] **Step 2: Implement the controller** to own button/input state and delegate evaluation to `CalculateExpression`.
-- [ ] **Step 3: Implement the redesigned Swing window** as a view only; initialize it on the Swing event dispatch thread and keep layout/styling out of the domain and use case.
-- [ ] **Step 4: Add detailed English Javadocs** for public application and presentation types and methods, describing the flow from button input to result display.
-- [ ] **Step 5: Run `mvn test`** and complete a manual GUI checklist for digits, decimals, operators, parentheses, equals, errors, and starting a new expression.
-- [ ] **Step 6: Capture the new UI** and compare it with `docs/reference/ui-before-refactor.png`; adjust the layout until the result display and keypad are visually clear and consistently aligned.
+- [x] **Step 1: Implement `CalculateExpression`** as the single application entry point for calculation, translating domain results/errors into a presentation-friendly result without importing Swing.
+- [x] **Step 2: Implement the controller** to own button/input state and delegate evaluation to `CalculateExpression`.
+- [x] **Step 3: Implement the redesigned Swing window** as a view only; initialize it on the Swing event dispatch thread and keep layout/styling out of the domain and use case.
+- [x] **Step 4: Add detailed English Javadocs** for public application and presentation types and methods, describing the flow from button input to result display.
+- [x] **Step 5: Run `mvn test`** and complete a manual GUI checklist for digits, decimals, operators, parentheses, equals, errors, and starting a new expression.
+- [x] **Step 6: Capture the new UI** and compare it with `docs/reference/ui-before-refactor.png`; adjust the layout until the result display and keypad are visually clear and consistently aligned.
 
 ### Task 4: Finish the English migration and document build/run
 
@@ -97,7 +97,7 @@
 - Consumes: final package structure and `com.calc2.Main` from Task 3.
 - Produces: English project documentation and a runnable Maven JAR.
 
-- [ ] **Step 1: Configure the JAR manifest** in `pom.xml` to use `com.calc2.Main`.
-- [ ] **Step 2: Rewrite the README in English** with JDK/Maven prerequisites and exact commands: `mvn clean test`, `mvn package`, and `java -jar target/calc2-1.0.0.jar`.
-- [ ] **Step 3: Review public Java APIs** to ensure all Javadocs and messages are English, specific, and pedagogical.
-- [ ] **Step 4: Run `mvn clean package`** and launch the JAR to confirm the packaged desktop application opens.
+- [x] **Step 1: Configure the JAR manifest** in `pom.xml` to use `com.calc2.Main`.
+- [x] **Step 2: Rewrite the README in English** with JDK/Maven prerequisites and exact commands: `mvn clean test`, `mvn package`, and `java -jar target/calc2-1.0.0.jar`.
+- [x] **Step 3: Review public Java APIs** to ensure all Javadocs and messages are English, specific, and pedagogical.
+- [x] **Step 4: Run `mvn clean package`** and launch the JAR to confirm the packaged desktop application opens.

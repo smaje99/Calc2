@@ -68,6 +68,9 @@ defaults.
 The calculator reports malformed expressions and mathematical domain errors, including
 division by zero, negative square roots, logarithms of non-positive values, tangent singularities,
 and overflow. Such expressions do not produce valid `NaN` or infinity results.
+For tangent, an angle is treated as undefined when the absolute cosine of its radian
+equivalent is below `1e-12`, which also covers floating-point approximations of odd
+multiples of 90 degrees or `pi/2` radians.
 
 ## UI comparison
 

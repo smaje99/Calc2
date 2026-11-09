@@ -15,6 +15,10 @@ package com.calc2.domain;
  * by zero using {@link CalculationException}, allowing callers such as a Swing controller
  * to show a helpful message instead of terminating the application.</p>
  *
+ * <p>When tangent is evaluated, angles whose cosine has an absolute value below
+ * {@code 1.0e-12} are treated as singular. This small tolerance avoids presenting a huge
+ * floating-point approximation where the mathematical function is undefined.</p>
+ *
  * <p>For example, {@code evaluate("2 + 3 * 4")} returns {@code 14.0}; multiplication is
  * completed before addition.</p>
  */
