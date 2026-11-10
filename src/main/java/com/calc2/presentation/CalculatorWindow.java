@@ -12,7 +12,15 @@ import java.util.List;
 public class CalculatorWindow extends JFrame {
     private static final int RESULT_DISPLAY_HEIGHT = 48;
     private static final Color DARK = new Color(22, 28, 39);
-    private static final Color LIGHT = new Color(241, 244, 248);
+    private static final Color LIGHT = new Color(246, 243, 235);
+    private static final Color DARK_KEY = new Color(48, 58, 75);
+    private static final Color LIGHT_KEY = new Color(230, 225, 214);
+    private static final Color DARK_OPERATOR = new Color(56, 93, 131);
+    private static final Color LIGHT_OPERATOR = new Color(158, 102, 28);
+    private static final Color LIGHT_SCIENTIFIC = new Color(233, 219, 191);
+    private static final Color LIGHT_SCIENTIFIC_FOREGROUND = new Color(74, 52, 22);
+    private static final Color DARK_EQUALS = new Color(0, 161, 151);
+    private static final Color LIGHT_EQUALS = new Color(139, 82, 27);
     /** Coordinates calculations requested by user input. */
     private final CalculatorController controller;
     /** Editable source of truth for text, caret, selection, and paste. */
@@ -228,10 +236,34 @@ public class CalculatorWindow extends JFrame {
             if (child instanceof JPanel) applyPalette((Container) child, background, foreground);
             else if (child instanceof JLabel) ((JLabel) child).setForeground(foreground);
             else if (child instanceof JButton) {
-                ((JButton) child).setBackground(settings.getTheme() == CalculatorTheme.DARK ? new Color(48, 58, 75) : new Color(220, 226, 234));
-                ((JButton) child).setForeground(foreground);
+                JButton button = (JButton) child;
+                String label = button.getText();
+                button.setBackground(buttonBackground(label, settings.getTheme()));
+                button.setForeground(buttonForeground(label, settings.getTheme(), foreground));
             }
         }
+    }
+    private static Color buttonBackground(String label, CalculatorTheme theme) {
+        boolean dark = theme == CalculatorTheme.DARK;
+        if ("=".equals(label)) return dark ? DARK_EQUALS : LIGHT_EQUALS;
+        if (isOperatorOrAction(label)) return dark ? DARK_OPERATOR : LIGHT_OPERATOR;
+        if (isScientificAction(label)) return dark ? DARK_OPERATOR : LIGHT_SCIENTIFIC;
+        return dark ? DARK_KEY : LIGHT_KEY;
+    }
+    private static boolean isOperatorOrAction(String label) {
+        return "AC".equals(label) || "(".equals(label) || ")".equals(label)
+                || "÷".equals(label) || "×".equals(label) || "−".equals(label)
+                || "+".equals(label) || "^".equals(label);
+    }
+    private static boolean isScientificAction(String label) {
+        return "√".equals(label) || "sin".equals(label) || "cos".equals(label)
+                || "tan".equals(label) || "log₁₀".equals(label) || "ln".equals(label)
+                || "π".equals(label) || "ℯ".equals(label) || "Ans".equals(label);
+    }
+    private static Color buttonForeground(String label, CalculatorTheme theme, Color defaultForeground) {
+        if ("=".equals(label) || isOperatorOrAction(label)) return Color.WHITE;
+        if (theme == CalculatorTheme.LIGHT && isScientificAction(label)) return LIGHT_SCIENTIFIC_FOREGROUND;
+        return defaultForeground;
     }
     /** Chooses a compact font for longer messages so calculation errors remain readable. */
     static int resultFontSize(boolean showingError) { return showingError ? 15 : 34; }
