@@ -56,7 +56,7 @@ public class CalculatorWindow extends JFrame {
         JComboBox<Integer> precision = new JComboBox<>(new Integer[]{2, 4, 6, 10}); precision.setSelectedItem(settings.getMaximumFractionDigits());
         JComboBox<CalculatorTheme> theme = new JComboBox<>(CalculatorTheme.values()); theme.setSelectedItem(settings.getTheme());
         controls.add(new JLabel("Angle")); controls.add(angle); controls.add(new JLabel("Digits")); controls.add(precision); controls.add(theme);
-        JButton history = new JButton("History"); history.addActionListener(e -> showHistory()); controls.add(history);
+        JButton history = new JButton("History"); history.setToolTipText("Ver el historial de cálculos"); history.addActionListener(e -> showHistory()); controls.add(history);
         top.add(controls, BorderLayout.SOUTH); content.add(top, BorderLayout.NORTH);
         content.add(createKeypad(), BorderLayout.CENTER);
         expressionInput.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -93,9 +93,50 @@ public class CalculatorWindow extends JFrame {
         return content;
     }
     private JPanel createKeypad() {
-        JPanel panel = new JPanel(new GridLayout(0, 4, 8, 8));
-        for (String key : keypadLabels()) { JButton button = new JButton(key); button.addActionListener(e -> keyPressed(key)); panel.add(button); }
+        JPanel panel = new JPanel(new GridBagLayout());
+        String[] keys = keypadLabels();
+        for (int index = 0; index < keys.length; index++) {
+            String key = keys[index];
+            JButton button = new JButton(key);
+            button.setPreferredSize(new Dimension(72, 44));
+            button.setToolTipText(keyTooltip(key));
+            button.addActionListener(e -> keyPressed(key));
+
+            GridBagConstraints constraints = new GridBagConstraints();
+            constraints.gridx = index % 4;
+            constraints.gridy = index / 4;
+            constraints.gridwidth = "Ans".equals(key) ? 4 : 1;
+            constraints.weightx = constraints.gridwidth;
+            constraints.weighty = 1;
+            constraints.fill = GridBagConstraints.BOTH;
+            constraints.insets = new Insets(4, 4, 4, 4);
+            panel.add(button, constraints);
+        }
         return panel;
+    }
+    private static String keyTooltip(String key) {
+        switch (key) {
+            case "AC": return "Borrar toda la operación";
+            case "(": return "Abrir paréntesis";
+            case ")": return "Cerrar paréntesis";
+            case "÷": return "Dividir";
+            case "×": return "Multiplicar";
+            case "−": return "Restar";
+            case "+": return "Sumar";
+            case "^": return "Elevar a una potencia";
+            case ".": return "Escribir punto decimal";
+            case "=": return "Calcular el resultado";
+            case "√": return "Calcular raíz cuadrada";
+            case "sin": return "Calcular seno";
+            case "cos": return "Calcular coseno";
+            case "tan": return "Calcular tangente";
+            case "log₁₀": return "Calcular logaritmo en base 10";
+            case "ln": return "Calcular logaritmo natural";
+            case "π": return "Insertar la constante pi";
+            case "ℯ": return "Insertar la constante de Euler";
+            case "Ans": return "Insertar el último resultado correcto";
+            default: return "Escribir " + key;
+        }
     }
     static String[] keypadLabels() {
         return new String[]{"AC", "(", ")", "÷", "7", "8", "9", "×", "4", "5", "6", "−", "1", "2", "3", "+", "^", "0", ".", "=", "√", "sin", "cos", "tan", "log₁₀", "ln", "π", "ℯ", "Ans"};
