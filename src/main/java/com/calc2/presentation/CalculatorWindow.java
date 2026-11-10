@@ -164,9 +164,17 @@ public class CalculatorWindow extends JFrame {
         if ("AC".equals(key)) { clear(); return; }
         if ("=".equals(key)) { evaluate(); return; }
         if ("Ans".equals(key)) {
-            controller.press(key);
-            expressionInput.setText(controller.getExpression());
-            expressionInput.setCaretPosition(expressionInput.getText().length());
+            if (controller.isResultDisplayed() || controller.hasError()) {
+                expressionInput.setText("");
+            }
+            int insertionStart = expressionInput.getSelectionStart();
+            String currentText = expressionInput.getText();
+            String multiplication = "";
+            if (insertionStart > 0 && isValueEnding(currentText.charAt(insertionStart - 1))) {
+                multiplication = "*";
+            }
+            expressionInput.replaceSelection(multiplication + controller.getLastAnswer());
+            controller.recall(expressionInput.getText());
             resultLabel.setText(expressionInput.getText());
             resultLabel.setForeground(settings.getTheme() == CalculatorTheme.DARK ? Color.WHITE : Color.BLACK);
             resultLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, resultFontSize(false)));
@@ -182,6 +190,9 @@ public class CalculatorWindow extends JFrame {
         expressionInput.replaceSelection(insertion);
         if (function) expressionInput.setCaretPosition(expressionInput.getCaretPosition() - 1);
         controller.recall(expressionInput.getText()); resultLabel.setText(expressionInput.getText().isEmpty() ? "0" : expressionInput.getText());
+    }
+    private static boolean isValueEnding(char character) {
+        return Character.isDigit(character) || character == ')' || character == 'π' || character == 'ℯ';
     }
     private void evaluate() {
         controller.evaluate(expressionInput.getText());

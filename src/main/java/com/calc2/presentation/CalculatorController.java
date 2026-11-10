@@ -80,6 +80,13 @@ public class CalculatorController {
         return expression.toString();
     }
 
+    /** Returns the most recent successful result for insertion at the input caret.
+     * @return the answer as an expression-compatible number
+     */
+    public String getLastAnswer() {
+        return lastAnswer;
+    }
+
     /** Evaluates complete text supplied by the editable expression field.
      * @param expressionText complete user-entered expression
      */
