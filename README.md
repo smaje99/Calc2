@@ -111,7 +111,9 @@ src/main/java/com/calc2/
 
 La interfaz no implementa reglas matemáticas: envía la expresión al controlador y al caso de
 uso de cálculo. Consulta [la guía de arquitectura](docs/architecture.md) para conocer las
-responsabilidades y dependencias entre estas partes.
+responsabilidades y dependencias entre estas partes. Para una explicación del análisis
+recursivo y su relación con estructuras de datos, consulta
+[cómo funciona el motor de expresiones](docs/como-funciona-el-motor.md).
 
 ## Capturas
 
