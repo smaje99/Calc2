@@ -51,12 +51,18 @@ public class CalculatorWindow extends JFrame {
         resultLabel.setPreferredSize(new Dimension(0, resultDisplayHeight()));
         resultLabel.setMinimumSize(new Dimension(0, resultDisplayHeight()));
         top.add(resultLabel, BorderLayout.CENTER);
-        JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        JPanel controls = new JPanel(new GridLayout(1, 4, 8, 0));
+        controls.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
         JComboBox<AngleUnit> angle = new JComboBox<>(AngleUnit.values()); angle.setSelectedItem(settings.getAngleUnit());
         JComboBox<Integer> precision = new JComboBox<>(new Integer[]{2, 4, 6, 10}); precision.setSelectedItem(settings.getMaximumFractionDigits());
         JComboBox<CalculatorTheme> theme = new JComboBox<>(CalculatorTheme.values()); theme.setSelectedItem(settings.getTheme());
-        controls.add(new JLabel("Angle")); controls.add(angle); controls.add(new JLabel("Digits")); controls.add(precision); controls.add(theme);
-        JButton history = new JButton("History"); history.setToolTipText("Ver el historial de cálculos"); history.addActionListener(e -> showHistory()); controls.add(history);
+        controls.add(createControlGroup("Angle", angle));
+        controls.add(createControlGroup("Precision", precision));
+        controls.add(createControlGroup("Theme", theme));
+        JButton history = new JButton("History");
+        history.setToolTipText("Ver el historial de cálculos");
+        history.addActionListener(e -> showHistory());
+        controls.add(createControlGroup("History", history));
         top.add(controls, BorderLayout.SOUTH); content.add(top, BorderLayout.NORTH);
         content.add(createKeypad(), BorderLayout.CENTER);
         expressionInput.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -91,6 +97,14 @@ public class CalculatorWindow extends JFrame {
         precision.addActionListener(e -> changeSettings(settings.getAngleUnit(), (Integer) precision.getSelectedItem(), settings.getTheme()));
         theme.addActionListener(e -> changeSettings(settings.getAngleUnit(), settings.getMaximumFractionDigits(), (CalculatorTheme) theme.getSelectedItem()));
         return content;
+    }
+    private JPanel createControlGroup(String label, JComponent control) {
+        JPanel group = new JPanel(new BorderLayout(0, 3));
+        JLabel title = new JLabel(label);
+        title.setFont(title.getFont().deriveFont(Font.BOLD, 11f));
+        group.add(title, BorderLayout.NORTH);
+        group.add(control, BorderLayout.CENTER);
+        return group;
     }
     private JPanel createKeypad() {
         JPanel panel = new JPanel(new GridBagLayout());
