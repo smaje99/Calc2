@@ -7,6 +7,7 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
+import java.util.function.Function;
 
 /** Swing view. The editable text field owns caret and selection behavior; the controller evaluates complete text. */
 public class CalculatorWindow extends JFrame {
@@ -64,13 +65,15 @@ public class CalculatorWindow extends JFrame {
         JComboBox<AngleUnit> angle = new JComboBox<>(AngleUnit.values()); angle.setSelectedItem(settings.getAngleUnit());
         JComboBox<Integer> precision = new JComboBox<>(new Integer[]{2, 4, 6, 10}); precision.setSelectedItem(settings.getMaximumFractionDigits());
         JComboBox<CalculatorTheme> theme = new JComboBox<>(CalculatorTheme.values()); theme.setSelectedItem(settings.getTheme());
-        controls.add(createControlGroup("Angle", angle));
-        controls.add(createControlGroup("Precision", precision));
-        controls.add(createControlGroup("Theme", theme));
-        JButton history = new JButton("History");
+        angle.setRenderer(localizedRenderer(value -> angleUnitLabel((AngleUnit) value)));
+        theme.setRenderer(localizedRenderer(value -> themeLabel((CalculatorTheme) value)));
+        controls.add(createControlGroup("Ángulo", angle));
+        controls.add(createControlGroup("Precisión", precision));
+        controls.add(createControlGroup("Tema", theme));
+        JButton history = new JButton("Historial");
         history.setToolTipText("Ver el historial de cálculos");
         history.addActionListener(e -> showHistory());
-        controls.add(createControlGroup("History", history));
+        controls.add(createControlGroup("Historial", history));
         top.add(controls, BorderLayout.SOUTH); content.add(top, BorderLayout.NORTH);
         content.add(createKeypad(), BorderLayout.CENTER);
         expressionInput.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -114,12 +117,27 @@ public class CalculatorWindow extends JFrame {
         group.add(control, BorderLayout.CENTER);
         return group;
     }
+    private static ListCellRenderer<Object> localizedRenderer(Function<Object, String> labeler) {
+        return new DefaultListCellRenderer() {
+            @Override public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+                return super.getListCellRendererComponent(list, labeler.apply(value), index, isSelected, cellHasFocus);
+            }
+        };
+    }
+    private static String angleUnitLabel(AngleUnit unit) {
+        return unit == AngleUnit.DEGREES ? "Grados" : "Radianes";
+    }
+    private static String themeLabel(CalculatorTheme theme) {
+        return theme == CalculatorTheme.DARK ? "Oscuro" : "Claro";
+    }
     private JPanel createKeypad() {
         JPanel panel = new JPanel(new GridBagLayout());
         String[] keys = keypadLabels();
         for (int index = 0; index < keys.length; index++) {
             String key = keys[index];
-            JButton button = new JButton(key);
+            JButton button = new JButton(keyLabel(key));
+            button.setActionCommand(key);
             button.setPreferredSize(new Dimension(72, 44));
             button.setToolTipText(keyTooltip(key));
             button.addActionListener(e -> keyPressed(key));
@@ -135,6 +153,11 @@ public class CalculatorWindow extends JFrame {
             panel.add(button, constraints);
         }
         return panel;
+    }
+    private static String keyLabel(String key) {
+        if ("AC".equals(key)) return "Borrar";
+        if ("Ans".equals(key)) return "Rta.";
+        return key;
     }
     private static String keyTooltip(String key) {
         switch (key) {
@@ -204,9 +227,18 @@ public class CalculatorWindow extends JFrame {
     }
     private void evaluate() {
         controller.evaluate(expressionInput.getText());
-        resultLabel.setText(controller.hasError() ? controller.getDisplay() : ResultFormatter.format(Double.parseDouble(controller.getDisplay()), settings.getMaximumFractionDigits()));
+        resultLabel.setText(controller.hasError() ? localizedError(controller.getDisplay()) : ResultFormatter.format(Double.parseDouble(controller.getDisplay()), settings.getMaximumFractionDigits()));
         resultLabel.setForeground(controller.hasError() ? new Color(205, 45, 45) : (settings.getTheme() == CalculatorTheme.DARK ? Color.WHITE : Color.BLACK));
         resultLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, resultFontSize(controller.hasError())));
+    }
+    private static String localizedError(String message) {
+        if ("The expression is incomplete or invalid.".equals(message)) return "La expresión está incompleta o no es válida.";
+        if ("Division by zero is not allowed.".equals(message)) return "No se permite dividir entre cero.";
+        if ("Square root requires a non-negative value.".equals(message)) return "La raíz cuadrada requiere un valor no negativo.";
+        if ("Logarithms require a positive value.".equals(message)) return "Los logaritmos requieren un valor positivo.";
+        if ("Tangent is undefined at this angle.".equals(message)) return "La tangente no está definida para este ángulo.";
+        if ("The result is outside the calculator's finite range.".equals(message)) return "El resultado supera el rango de la calculadora.";
+        return message;
     }
     private void clear() { controller.clear(); expressionInput.setText(""); resultLabel.setText("0"); resultLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, resultFontSize(false))); }
     private void showHistory() {
@@ -214,7 +246,7 @@ public class CalculatorWindow extends JFrame {
         for (CalculationRecord record : entries) model.addElement(record);
         JList<CalculationRecord> list = new JList<>(model); list.setCellRenderer((l, value, index, selected, focus) -> new JLabel(value.getExpression() + " = " + ResultFormatter.format(value.getResult(), settings.getMaximumFractionDigits())));
         list.addListSelectionListener(e -> { if (!e.getValueIsAdjusting() && list.getSelectedValue() != null) { String text = list.getSelectedValue().getExpression(); controller.recall(text); expressionInput.setText(text); } });
-        JOptionPane.showMessageDialog(this, new JScrollPane(list), "Calculation history", JOptionPane.PLAIN_MESSAGE);
+        JOptionPane.showMessageDialog(this, new JScrollPane(list), "Historial de cálculos", JOptionPane.PLAIN_MESSAGE);
     }
     private void changeSettings(AngleUnit unit, int digits, CalculatorTheme theme) {
         settings = new CalculatorSettings(unit, digits, theme); controller.setAngleUnit(unit); applySettings();
@@ -237,7 +269,7 @@ public class CalculatorWindow extends JFrame {
             else if (child instanceof JLabel) ((JLabel) child).setForeground(foreground);
             else if (child instanceof JButton) {
                 JButton button = (JButton) child;
-                String label = button.getText();
+                String label = button.getActionCommand();
                 button.setBackground(buttonBackground(label, settings.getTheme()));
                 button.setForeground(buttonForeground(label, settings.getTheme(), foreground));
             }
