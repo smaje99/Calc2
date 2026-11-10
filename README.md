@@ -1,80 +1,120 @@
 # Calc2
 
-Calc2 is a small Java desktop scientific calculator for learning how an application can
-separate its user interface from its calculation rules. It evaluates arithmetic and common
-scientific functions, keeps a short session history, and remembers display preferences.
+Calc2 es una calculadora científica de escritorio escrita en Java y Swing. Permite escribir
+expresiones, evaluarlas con precisión de punto flotante, consultar cálculos recientes y
+personalizar el modo angular, la precisión mostrada y el tema.
 
-## Requirements
+## Requisitos
 
-- JDK 8 or newer
-- Maven 3.6.3 or newer
+- JDK 8 o posterior.
+- Maven 3.6.3 o posterior.
+- Un entorno gráfico compatible con Swing para abrir la aplicación.
 
-## Build and run
+## Compilar y ejecutar
 
-Run the automated tests:
+Desde la raíz del repositorio:
 
 ```bash
 mvn clean test
-```
-
-Build the executable application JAR:
-
-```bash
 mvn package
-```
-
-Launch the desktop calculator:
-
-```bash
 java -jar target/calc2-1.0.0.jar
 ```
 
-## Project structure
+`mvn clean test` compila el proyecto y ejecuta las pruebas automatizadas. `mvn package`
+genera el JAR ejecutable en `target/`. La aplicación no recibe argumentos de línea de
+comandos por ahora.
 
-- `com.calc2.domain` parses expressions, applies operator precedence, and reports calculation errors.
-- `com.calc2.application` exposes the `CalculateExpression` use case to the rest of the application.
-- `com.calc2.presentation` contains the Swing window and its input-state controller.
-- `com.calc2.Main` creates the presentation components and starts Swing on its event dispatch thread.
+## Funciones
 
-The domain and application packages do not depend on Swing or platform preferences. This
-keeps calculation rules usable and testable without opening a window.
+- Operaciones: suma (`+`), resta (`−`), multiplicación (`×`), división (`÷`) y potencia (`^`).
+- Agrupación con paréntesis y números decimales o en notación científica.
+- Raíz cuadrada (`√`), seno (`sin`), coseno (`cos`), tangente (`tan`), logaritmo base 10
+  (`log₁₀`) y logaritmo natural (`ln`).
+- Constantes pi (`π` o `pi`) y Euler (`ℯ` o `e`).
+- `Ans` inserta el último resultado correcto como número en la posición del cursor. Si el
+  carácter anterior ya termina un valor, añade multiplicación explícita; por ejemplo, se puede
+  insertar el resultado dentro de `cos()`.
+- Historial de hasta 50 operaciones correctas durante la sesión. Elegir una entrada recupera
+  su expresión para editarla; los errores no se guardan.
+- Modo angular en grados o radianes, precisión mostrada de 2, 4, 6 o 10 decimales y temas
+  oscuro o claro.
 
-## Expression rules
+La pantalla conserva una altura fija para el resultado y los errores, de modo que un mensaje
+de error no desplaza la cuadrícula. Los botones tienen descripciones emergentes.
 
-Expressions support decimal and scientific-notation numbers, parentheses, `+`, `-`, `*`, `/`,
-`×`, `÷`, `−`, `^`, constants `pi`/`π` and `e`/`ℯ`, and `sqrt(x)`, `sin(x)`, `cos(x)`,
-`tan(x)`, `log(x)` (base 10), and `ln(x)`. Function names are lowercase and require
-parentheses. Examples include `sqrt(9)`, `6.8514001115625E8×π`, `2^3^2` (which means
-`2^(3^2)` and evaluates to `512`), and `sin(90)` in degree mode. Unary signs preserve the
-usual power behavior: `-2^2` is `-4`, while `2^-2` is `0.25`. Trigonometry defaults to degrees;
-the angle selector can switch it to radians. The `pi` constant retains its mathematical value
-in either mode.
+## Sintaxis de expresiones
 
-## Editing, history, and preferences
+Las funciones se escriben con el nombre en minúsculas y un argumento entre paréntesis. Las
+operaciones entre constantes, funciones y números deben incluir el operador correspondiente;
+por ejemplo, usa `6.85E8*π`. `Ans` es un botón que inserta el último resultado como número; no
+es una palabra reservada que se pueda escribir en una expresión. No se admite multiplicación
+implícita como `2π`.
 
-The expression field supports normal caret movement, selection, typing, paste, Backspace, and
-Delete. Enter evaluates; Escape and `AC` clear. Keypad input replaces the selected text, and
-function buttons insert templates such as `sin()` with the caret inside the parentheses. The
-expression keeps the same multiplication, division, and minus symbols shown on the keypad.
-History lists up to the 50 most recent successful calculations for the current run. Selecting
-one restores its expression for editing; errors are not stored.
+| Expresión | Significado |
+| --- | --- |
+| `2 + 3 * 4` | Multiplicación antes que suma; resultado `14` |
+| `2^3^2` | Potencias asociadas de derecha a izquierda: `2^(3^2)` |
+| `-2^2` | El signo unario se aplica después de la potencia: `-(2^2)` |
+| `sqrt(9)` | Raíz cuadrada |
+| `sin(90)` | Seno de 90 grados con el modo inicial |
+| `log(100)` | Logaritmo base 10 |
+| `ln(e)` | Logaritmo natural |
+| `6.8514E8*π` | Notación científica y constante pi |
 
-Display precision can be set to 2, 4, 6, or 10 fractional digits. Rounding applies only to the
-shown result and uses a decimal point regardless of the computer's locale. The default is 10
-digits. The theme defaults to dark; light is also available. Angle mode, precision, and theme
-are saved using Java Preferences under the application package node with keys `angleUnit`,
-`maximumFractionDigits`, and `theme`. Missing or invalid values independently fall back to
-degrees, 10 digits, and dark. If preferences are unavailable, the calculator starts with those
-defaults.
+Se reconocen también los símbolos de teclado `*`, `/`, `-` y los símbolos visuales `×`, `÷`,
+`−`. La unidad angular solo afecta a `sin`, `cos` y `tan`; las constantes `π` y `ℯ` mantienen
+su valor matemático en ambos modos.
 
-The calculator reports malformed expressions and mathematical domain errors, including
-division by zero, negative square roots, logarithms of non-positive values, tangent singularities,
-and overflow. Such expressions do not produce valid `NaN` or infinity results.
-For tangent, an angle is treated as undefined when the absolute cosine of its radian
-equivalent is below `1e-12`, which also covers floating-point approximations of odd
-multiples of 90 degrees or `pi/2` radians.
+## Uso de la interfaz
 
-## UI comparison
+- Escribe en el campo de expresión o utiliza el teclado en pantalla. El cursor y la selección
+  permiten insertar o reemplazar texto; también se admite pegar texto.
+- `Enter` calcula la expresión y `Escape` la borra. `AC` también limpia la operación.
+- Los botones de función insertan una plantilla, como `cos()`, y dejan el cursor dentro de los
+  paréntesis para introducir el argumento.
+- Después de un resultado, un operador continúa el cálculo con ese resultado; un número inicia
+  una operación nueva. Para usar el resultado anterior como argumento de una función, pulsa el
+  botón de función y luego `Ans` con el cursor dentro de sus paréntesis.
+- Cambiar el modo angular, la precisión o el tema actualiza la preferencia guardada.
 
-The original interface is preserved at [`docs/reference/ui-before-refactor.png`](docs/reference/ui-before-refactor.png).
-The refactored interface is captured at [`docs/reference/ui-after-refactor.png`](docs/reference/ui-after-refactor.png).
+## Errores y precisión
+
+El evaluador rechaza expresiones incompletas, división por cero, raíces cuadradas de números
+negativos, logaritmos de valores no positivos, tangentes en sus singularidades y resultados no
+finitos. Los errores se muestran en la interfaz y no se incorporan al historial.
+
+Los cálculos se conservan como valores `double`; la precisión elegida solo redondea el texto
+mostrado. El formato usa punto decimal independientemente de la configuración regional. El
+redondeo mostrado es `HALF_UP` y se eliminan ceros decimales finales, conservando al menos un
+dígito decimal.
+
+## Preferencias y datos de sesión
+
+La unidad angular, la precisión y el tema se guardan con Java Preferences bajo el nodo de
+preferencias del paquete `com.calc2`. Las claves son `angleUnit`, `maximumFractionDigits` y
+`theme`. Si falta un valor, es inválido o el almacenamiento no está disponible, se utilizan
+los valores predeterminados: grados, 10 dígitos y tema oscuro.
+
+El historial y `Ans` viven en memoria y se reinician al cerrar la aplicación. El historial
+retiene las 50 operaciones correctas más recientes.
+
+## Estructura del código
+
+```text
+src/main/java/com/calc2/
+├── Main.java                 # Arranque y composición de la aplicación
+├── domain/                   # Evaluación, errores y unidad angular
+├── application/              # Casos de uso, ajustes e historial
+├── infrastructure/           # Adaptador de Java Preferences
+└── presentation/             # Ventana Swing, controlador y formato de resultados
+```
+
+La interfaz no implementa reglas matemáticas: envía la expresión al controlador y al caso de
+uso de cálculo. Consulta [la guía de arquitectura](docs/architecture.md) para conocer las
+responsabilidades y dependencias entre estas partes.
+
+## Capturas
+
+- [Interfaz antes de la refactorización](docs/reference/ui-before-refactor.png)
+- [Interfaz después de la refactorización](docs/reference/ui-after-refactor.png)
+- [Interfaz con las capacidades científicas](docs/reference/ui-after-capabilities.png)
